@@ -1,0 +1,35 @@
+Compos:
+Frontend → React 
+
+Backend → AdonisJS
+
+Base de données → mysql
+
+Monitoring → Grafana ou Metabase
+
+Conteneurisation → Docker + Docker Compose
+
+CI/CD → GitHub Actions
+
+
+Communication:
+
+Frontend → Backend : via API HTTP (JSON)
+
+Backend → Base de données : via requêtes DB
+
+Backend → Monitoring : en envoyant les metrics
+
+CI/CD → Docker : construit l’image et déploie le projet
+
+
+Schéma:
+[ React Frontend ]
+        |
+        v
+[ AdonisJS Backend ] ---> [ Database ]
+        |
+        v
+[ Monitoring ]
+
+L’architecture du projet est composée d’un frontend React, d’un backend AdonisJS et d’une base de données mysql. Les services sont conteneurisés avec Docker et orchestrés via Docker Compose pour assurer un déploiement reproductible. Un pipeline CI/CD automatisera les tests et la construction des images, et un outil de monitoring permettra de suivre les performances et la disponibilité du système.
