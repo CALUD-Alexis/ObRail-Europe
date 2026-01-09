@@ -1,0 +1,13 @@
+{
+  "name": "obrail-backend",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node ace serve --watch"
+  },
+  "dependencies": {
+    "@adonisjs/core": "^5.0.0",
+    "@adonisjs/lucid": "^15.0.0",
+    "pg": "^8.11.1"
+  }
+}
