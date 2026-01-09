@@ -1,29 +1,32 @@
-# Étape 1 : construire le frontend
-FROM node:18 as build
+# Étape 1 : construire l'application
+FROM node:20-alpine AS build
 
-# Définir le dossier de travail à l'intérieur du container
+# Définir le répertoire de travail
 WORKDIR /app
 
-# Copier les fichiers de dépendances pour que Docker puisse installer les packages
+# Copier package.json et package-lock.json
 COPY package*.json ./
 
-# Installer les dépendances du projet
+# Installer les dépendances
 RUN npm install
 
-# Copier tout le code source dans le container
+# Copier le reste du code source
 COPY . .
 
-# Construire le projet React (crée le dossier build/ prêt à être servi)
+# Construire l'application React
 RUN npm run build
 
-# Étape 2 : servir le build avec un serveur léger (nginx)
+# Étape 2 : servir l'application avec un serveur léger
 FROM nginx:alpine
 
-# Copier le dossier build créé précédemment dans nginx
+# Copier le build depuis l'étape précédente
 COPY --from=build /app/build /usr/share/nginx/html
 
-# Exposer le port 80 pour accéder à l'application depuis le navigateur
+# Copier le fichier de config Nginx si nécessaire (optionnel)
+# COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Exposer le port 80
 EXPOSE 80
 
-# Commande pour démarrer Nginx en mode foreground
+# Commande par défaut
 CMD ["nginx", "-g", "daemon off;"]
