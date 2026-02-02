@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Trajet from '#models/trajet'
+import { indexTrajetsValidator, showTrajetValidator } from '#validators/trajet'
 
 export default class TrajetsController {
   /**
@@ -7,6 +8,7 @@ export default class TrajetsController {
    * Returns a list of all trajets with optional filtering
    */
   async index({ request, response }: HttpContext) {
+    const payload = await request.validateUsing(indexTrajetsValidator)
     const {
       operator,
       trainType,
@@ -14,7 +16,7 @@ export default class TrajetsController {
       arrivalCountry,
       page = 1,
       limit = 20,
-    } = request.qs()
+    } = payload
 
     const query = Trajet.query().where('active', true)
 
@@ -44,12 +46,13 @@ export default class TrajetsController {
    * Returns a single trajet by ID
    */
   async show({ params, response }: HttpContext) {
-    const trajet = await Trajet.find(params.id)
+    const { id } = await showTrajetValidator.validate(params)
+    const trajet = await Trajet.find(id)
 
     if (!trajet) {
       return response.notFound({
         error: 'Trajet not found',
-        message: `No trajet found with id ${params.id}`,
+        message: `No trajet found with id ${id}`,
       })
     }
 
