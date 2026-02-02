@@ -1,28 +1,39 @@
 <template>
-  <div class="login">
-    <h1>Connexion</h1>
-    <form @submit.prevent="login">
-      <div>
-        <label for="username">Nom d'utilisateur:</label>
-        <input 
-          type="text" 
-          id="username" 
-          v-model="username" 
-          required 
-        />
+  <div class="container">
+    <div class="login">
+      <div class="card">
+        <h1>Connexion 🔐</h1>
+        <p class="text-muted">Accédez à votre espace ObRail-Europe</p>
+        
+        <form @submit.prevent="login">
+          <div class="form-group">
+            <label for="username">Nom d'utilisateur</label>
+            <input 
+              type="text" 
+              id="username" 
+              v-model="username" 
+              class="form-input"
+              placeholder="Entrez votre nom d'utilisateur"
+              required 
+            />
+          </div>
+          <div class="form-group">
+            <label for="password">Mot de passe</label>
+            <input 
+              type="password" 
+              id="password" 
+              v-model="password" 
+              class="form-input"
+              placeholder="Entrez votre mot de passe"
+              required 
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Se connecter</button>
+        </form>
+        
+        <p v-if="error" class="text-error" style="margin-top: 1rem;">{{ error }}</p>
       </div>
-      <div>
-        <label for="password">Mot de passe:</label>
-        <input 
-          type="password" 
-          id="password" 
-          v-model="password" 
-          required 
-        />
-      </div>
-      <button type="submit">Se connecter</button>
-    </form>
-    <p v-if="error" class="error">{{ error }}</p>
+    </div>
   </div>
 </template>
 
@@ -49,53 +60,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-.login {
-  padding: 20px;
-  max-width: 400px;
-  margin: 0 auto;
-}
-
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-div {
-  display: flex;
-  flex-direction: column;
-  text-align: left;
-}
-
-label {
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-input {
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-button {
-  background-color: #42b983;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-top: 10px;
-}
-
-button:hover {
-  background-color: #35a372;
-}
-
-.error {
-  color: red;
-  margin-top: 10px;
-}
-</style>

@@ -1,9 +1,19 @@
 <template>
-  <div class="about">
-    <h1>À propos d'ObRail-Europe</h1>
-    <p>Cette page est protégée par un guard de navigation.</p>
-    <p>Vous devez être authentifié pour y accéder.</p>
-    <button @click="logout">Se déconnecter</button>
+  <div class="container">
+    <div class="about">
+      <div class="card">
+        <h1>À propos d'ObRail-Europe</h1>
+        <p>Cette page est protégée par un guard de navigation.</p>
+        <p class="text-muted">Vous devez être authentifié pour y accéder.</p>
+        
+        <div class="info-section">
+          <h3>🔒 Accès sécurisé</h3>
+          <p>Votre session est protégée et vos données sont en sécurité.</p>
+        </div>
+
+        <button @click="logout" class="btn btn-secondary">Se déconnecter</button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -18,23 +28,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-.about {
-  padding: 20px;
-}
-
-button {
-  background-color: #42b983;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-top: 20px;
-}
-
-button:hover {
-  background-color: #35a372;
-}
-</style>
