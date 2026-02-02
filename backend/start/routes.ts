@@ -10,6 +10,7 @@
 import router from '@adonisjs/core/services/router'
 
 const TrajetsController = () => import('#controllers/trajets_controller')
+const StatsController = () => import('#controllers/stats_controller')
 
 router.get('/', async () => {
   return {
@@ -22,3 +23,6 @@ router.get('/', async () => {
 // Trajets routes
 router.get('/trajets', [TrajetsController, 'index'])
 router.get('/trajets/:id', [TrajetsController, 'show'])
+
+// Stats routes
+router.get('/stats/volumes', [StatsController, 'volumes'])
