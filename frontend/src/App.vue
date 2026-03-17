@@ -1,27 +1,19 @@
 <template>
-  <div id="app">
-    <header class="main-header">
-      <div class="container">
-        <nav class="main-nav">
-          <div class="nav-brand">
-            <h2>🚆 ObRail-Europe</h2>
-          </div>
-          <div class="nav-links">
-            <router-link to="/" class="nav-link">Accueil</router-link>
-            <router-link to="/about" class="nav-link">À propos</router-link>
-            <router-link to="/login" class="nav-link">Connexion</router-link>
-          </div>
-        </nav>
-      </div>
-    </header>
+  <div class="app-layout">
+    <Sidebar v-if="!isLoginPage" />
+    
     <main class="main-content">
       <router-view />
     </main>
   </div>
 </template>
 
-<script>
-export default {
-  name: 'App'
-}
+<script setup>
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+import Sidebar from '@/components/Sidebar.vue'
+
+const route = useRoute()
+// On n'affiche pas la sidebar sur la page de login
+const isLoginPage = computed(() => route.path === '/login')
 </script>

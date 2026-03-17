@@ -1,43 +1,35 @@
 <template>
-  <div class="container">
-    <div class="home">
-      <div class="hero">
-        <h1>Bienvenue sur ObRail-Europe 🚆</h1>
-        <p class="text-muted">Votre plateforme de gestion ferroviaire durable</p>
+  <div class="page-container text-center">
+    <div class="hero mb-2" style="padding: 40px 0;">
+      <h1 class="text-xl text-primary mb-2">Bienvenue sur ObRail-Europe 🚆</h1>
+      <p class="text-lg text-muted">Observatoire indépendant de la mobilité ferroviaire durable en Europe.</p>
+    </div>
+
+    <div class="grid-4 mt-2" style="grid-template-columns: repeat(3, 1fr);">
+      <div class="card">
+        <div class="text-xl mb-2">🌱</div>
+        <h3 class="mb-2">Éco-responsable</h3>
+        <p class="text-muted mb-2">Soutien aux objectifs de neutralité carbone.</p>
+        <span class="badge badge-success">Green Deal</span>
       </div>
 
-      <div class="features">
-        <div class="card">
-          <h3>🌱 Éco-responsable</h3>
-          <p class="text-muted">Transport durable et écologique</p>
-          <span class="badge badge-success">Green Deal</span>
-        </div>
-
-        <div class="card">
-          <h3>🌞 Trajets Jour</h3>
-          <p class="text-muted">Voyagez en journée</p>
-          <span class="badge badge-day">Jour</span>
-        </div>
-
-        <div class="card">
-          <h3>🌙 Trajets Nuit</h3>
-          <p class="text-muted">Voyagez de nuit</p>
-          <span class="badge badge-night">Nuit</span>
-        </div>
+      <div class="card">
+        <div class="text-xl mb-2">☀️</div>
+        <h3 class="mb-2">Trajets Jour</h3>
+        <p class="text-muted mb-2">Analyse du maillage grande vitesse.</p>
+        <span class="badge badge-day">Trains de Jour</span>
       </div>
 
-      <div class="cta">
-        <router-link to="/about" class="btn btn-primary">En savoir plus</router-link>
+      <div class="card">
+        <div class="text-xl mb-2">🌙</div>
+        <h3 class="mb-2">Trajets Nuit</h3>
+        <p class="text-muted mb-2">Alternative bas-carbone à l'aérien.</p>
+        <span class="badge badge-night">Trains de Nuit</span>
       </div>
     </div>
   </div>
 </template>
 
-<script>
-export default {
-  name: 'Home',
-  mounted() {
-    console.log('Home page mounted')
-  }
-}
+<script setup>
+// Plus besoin de code ici pour le moment
 </script>

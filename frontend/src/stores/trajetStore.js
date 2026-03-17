@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import trajetsMock from '@/mocks/trajets.json'
 
 /**
  * Store pour gérer les trajets ferroviaires
@@ -36,10 +37,11 @@ export const useTrajetStore = defineStore('trajet', () => {
     if (filters.value.searchQuery) {
       const query = filters.value.searchQuery.toLowerCase()
       result = result.filter(t => 
-        t.numero?.toLowerCase().includes(query) ||
-        t.gareDepart?.toLowerCase().includes(query) ||
-        t.gareArrivee?.toLowerCase().includes(query) ||
-        t.operateur?.toLowerCase().includes(query)
+        t.trip_id?.toLowerCase().includes(query) ||
+        t.origin_station?.toLowerCase().includes(query) ||
+        t.destination_station?.toLowerCase().includes(query) ||
+        t.agency_id?.toLowerCase().includes(query) ||
+        t.route_name?.toLowerCase().includes(query)
       )
     }
 
@@ -89,11 +91,13 @@ export const useTrajetStore = defineStore('trajet', () => {
     error.value = null
 
     try {
-      const response = await fetch('/api/trajets')
-      const data = await response.json()
-      trajets.value = data
+      // On simule l'attente du réseau (500ms)
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      // On charge nos fausses données !
+      trajets.value = trajetsMock
     } catch (err) {
-      error.value = err.message
+      error.value = "Erreur lors du chargement des trajets"
       console.error('Erreur chargement trajets:', err)
     } finally {
       loading.value = false
@@ -105,12 +109,40 @@ export const useTrajetStore = defineStore('trajet', () => {
     error.value = null
 
     try {
-      const response = await fetch(`/api/trajets/${id}/details`)
-      const data = await response.json()
-      trajetDetails.value = data
-      // Les détails incluent : fiche technique, coordonnées GPS, horaires, arrêts intermédiaires
+      // Simulate network request
+      await new Promise(resolve => setTimeout(resolve, 300))
+      
+      // On cherche d'abord les détails basiques depuis les mock existants
+      // l'id est un "trip_id" du coup (ex: "TR-1045")
+      const baseTrajet = trajets.value.find(t => t.trip_id === id) || {}
+
+      // On crée un mock pour les détails techniques
+      trajetDetails.value = {
+        ...baseTrajet,
+        numero: baseTrajet.route_name,
+        statut: baseTrajet.status,
+        gareDepart: baseTrajet.origin_station,
+        gareArrivee: baseTrajet.destination_station,
+        operateur: baseTrajet.agency_id,
+        heureDepart: baseTrajet.departure_time || "2026-03-17T08:30:00Z",
+        heureArrivee: baseTrajet.arrival_time || "2026-03-17T11:45:00Z",
+        duree: "3h 15m",
+        typeTrain: baseTrajet.train_type || "TGV Duplex",
+        nombreVoitures: 8,
+        capacite: 510,
+        distance: baseTrajet.distance || 450,
+        vitesseMoyenne: 220,
+        consommation: 1250,
+        arrets: [
+          { gare: baseTrajet.origin_station || "Départ", heureArrivee: "08:15", heureDepart: "08:30", dureeArret: 15 },
+          { gare: "Gare Intermédiaire", heureArrivee: "10:00", heureDepart: "10:10", dureeArret: 10 },
+          { gare: baseTrajet.destination_station || "Arrivée", heureArrivee: "11:45", heureDepart: "12:00", dureeArret: 15 }
+        ],
+        coordonneesDepart: { lat: 48.8566, lng: 2.3522 },
+        coordonneesArrivee: { lat: 45.7640, lng: 4.8357 }
+      }
     } catch (err) {
-      error.value = err.message
+      error.value = "Erreur lors du chargement des détails du trajet"
       console.error('Erreur chargement détails trajet:', err)
     } finally {
       loading.value = false
