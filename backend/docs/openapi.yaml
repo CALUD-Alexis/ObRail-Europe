@@ -1,0 +1,366 @@
+openapi: 3.0.3
+info:
+  title: ObRail Europe API
+  description: |
+    API REST de l'observatoire europeen des dessertes ferroviaires.
+    Cette API permet de consulter les trajets ferroviaires europeens,
+    d'obtenir des statistiques sur les volumes et de surveiller l'etat du service.
+  version: 1.0.0
+  contact:
+    name: ObRail Europe
+    url: https://github.com/CALUD-Alexis/ObRail-Europe
+
+servers:
+  - url: http://localhost:3333
+    description: Serveur de developpement
+
+paths:
+  /:
+    get:
+      summary: Informations sur l'API
+      description: Retourne les informations de base sur l'API
+      responses:
+        '200':
+          description: Informations de l'API
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    example: ObRail Europe API
+                  version:
+                    type: string
+                    example: 1.0.0
+                  description:
+                    type: string
+                    example: European Railway Observatory API
+
+  /health:
+    get:
+      summary: Etat de sante du service
+      description: Verifie l'etat de sante de l'API et de ses dependances
+      tags:
+        - Monitoring
+      responses:
+        '200':
+          description: Service en bonne sante
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+        '503':
+          description: Service indisponible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+
+  /trajets:
+    get:
+      summary: Liste des trajets
+      description: Retourne la liste des trajets ferroviaires avec possibilite de filtrage et pagination
+      tags:
+        - Trajets
+      parameters:
+        - name: operator
+          in: query
+          description: Filtrer par operateur ferroviaire
+          schema:
+            type: string
+            example: SNCF
+        - name: trainType
+          in: query
+          description: Filtrer par type de train
+          schema:
+            type: string
+            enum: [day, night]
+        - name: departureCountry
+          in: query
+          description: Filtrer par pays de depart
+          schema:
+            type: string
+            example: France
+        - name: arrivalCountry
+          in: query
+          description: Filtrer par pays d'arrivee
+          schema:
+            type: string
+            example: Germany
+        - name: page
+          in: query
+          description: Numero de page pour la pagination
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Nombre de resultats par page (max 100)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Liste des trajets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrajetPaginated'
+        '422':
+          description: Erreur de validation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /trajets/{id}:
+    get:
+      summary: Details d'un trajet
+      description: Retourne les details d'un trajet specifique
+      tags:
+        - Trajets
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identifiant du trajet
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Details du trajet
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trajet'
+        '404':
+          description: Trajet non trouve
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+        '422':
+          description: Erreur de validation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /stats/volumes:
+    get:
+      summary: Statistiques des volumes
+      description: Retourne les statistiques sur les volumes de trajets
+      tags:
+        - Statistiques
+      responses:
+        '200':
+          description: Statistiques des volumes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VolumeStats'
+
+components:
+  schemas:
+    Trajet:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        departureStation:
+          type: string
+          example: Paris Gare de Lyon
+        arrivalStation:
+          type: string
+          example: Milano Centrale
+        departureTime:
+          type: string
+          format: time
+          example: "07:15"
+        arrivalTime:
+          type: string
+          format: time
+          example: "14:30"
+        operator:
+          type: string
+          example: TGV INOUI
+        trainType:
+          type: string
+          enum: [day, night]
+          example: day
+        durationMinutes:
+          type: integer
+          example: 435
+        price:
+          type: number
+          nullable: true
+          example: 89.00
+        trainNumber:
+          type: string
+          nullable: true
+          example: TGV 9243
+        departureCountry:
+          type: string
+          nullable: true
+          example: France
+        arrivalCountry:
+          type: string
+          nullable: true
+          example: Italy
+        active:
+          type: boolean
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    TrajetPaginated:
+      type: object
+      properties:
+        meta:
+          type: object
+          properties:
+            total:
+              type: integer
+              example: 100
+            perPage:
+              type: integer
+              example: 20
+            currentPage:
+              type: integer
+              example: 1
+            lastPage:
+              type: integer
+              example: 5
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trajet'
+
+    VolumeStats:
+      type: object
+      properties:
+        total:
+          type: integer
+          example: 50
+        byTrainType:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                example: day
+              count:
+                type: integer
+                example: 35
+        byOperator:
+          type: array
+          items:
+            type: object
+            properties:
+              operator:
+                type: string
+                example: SNCF
+              count:
+                type: integer
+                example: 15
+        byDepartureCountry:
+          type: array
+          items:
+            type: object
+            properties:
+              country:
+                type: string
+                example: France
+              count:
+                type: integer
+                example: 20
+        averages:
+          type: object
+          properties:
+            durationMinutes:
+              type: integer
+              example: 320
+            price:
+              type: string
+              nullable: true
+              example: "75.50"
+
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+          example: healthy
+        timestamp:
+          type: string
+          format: date-time
+        uptime:
+          type: number
+          example: 3600.5
+        checks:
+          type: object
+          properties:
+            database:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [healthy, unhealthy, unknown]
+                  example: healthy
+                latency:
+                  type: integer
+                  example: 5
+
+    ValidationError:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Validation Error
+        message:
+          type: string
+          example: The provided data is invalid
+        statusCode:
+          type: integer
+          example: 422
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              rule:
+                type: string
+              message:
+                type: string
+
+    NotFoundError:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Trajet not found
+        message:
+          type: string
+          example: No trajet found with id 999
+
+tags:
+  - name: Trajets
+    description: Operations sur les trajets ferroviaires
+  - name: Statistiques
+    description: Statistiques et analyses
+  - name: Monitoring
+    description: Surveillance du service
