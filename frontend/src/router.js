@@ -1,46 +1,65 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Home from './views/Home.vue'
-import About from './views/About.vue'
-import Login from './views/Login.vue'
 
+// 1. Import de tes vues (Assure-toi de les avoir déplacées dans le dossier /views)
+import Login from './views/Login.vue'
+import Dashboard from './views/dashboardPage.vue'
+import Trajets from './views/trajetsPage.vue'
+import TrajetDetail from './views/trajetDetailPage.vue'
+// Tu pourras ajouter la page de monitoring plus tard :
+// import Monitoring from './views/monitoringPage.vue'
+
+// 2. Définition des routes
 const routes = [
-  {
-    path: '/',
-    name: 'Home',
-    component: Home
-  },
-  {
-    path: '/about',
-    name: 'About',
-    component: About,
-    // Guard de navigation - exemple de protection de route
-    beforeEnter: (to, from, next) => {
-      // Vérifie si l'utilisateur est authentifié
-      const isAuthenticated = localStorage.getItem('isAuthenticated')
-      if (isAuthenticated) {
-        next() // Continue vers la route
-      } else {
-        next('/login') // Redirige vers login si non authentifié
-      }
-    }
-  },
   {
     path: '/login',
     name: 'Login',
     component: Login
+    // Pas de meta requiresAuth ici, car c'est une page publique
+  },
+  {
+    path: '/',
+    name: 'Dashboard',
+    component: Dashboard,
+    meta: { requiresAuth: true } // Tag pour indiquer que la page est protégée
+  },
+  {
+    path: '/trajets',
+    name: 'Trajets',
+    component: Trajets,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/trajets/:id', // Le ":id" permet de faire une route dynamique (ex: /trajets/TRIP_123)
+    name: 'TrajetDetail',
+    component: TrajetDetail,
+    meta: { requiresAuth: true }
   }
 ]
 
+// 3. Création du routeur
 const router = createRouter({
   history: createWebHistory(),
   routes
 })
 
-// Guard de navigation global - s'exécute avant chaque changement de route
+// 4. Guard de navigation global (Le vigile à l'entrée du site)
 router.beforeEach((to, from, next) => {
-  console.log(`Navigation de ${from.path} vers ${to.path}`)
-  // Tu peux ajouter ici une logique globale (ex: vérifier l'auth, analytics, etc.)
-  next()
+  // On vérifie si la route où l'utilisateur veut aller nécessite d'être connecté
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
+  
+  // Simulation de l'authentification (à relier plus tard à ton authStore.js)
+  const isAuthenticated = localStorage.getItem('isAuthenticated')
+
+  if (requiresAuth && !isAuthenticated) {
+    // S'il n'est pas connecté et que la page est protégée -> retour au Login
+    next('/login')
+  } else if (to.path === '/login' && isAuthenticated) {
+    // S'il est DÉJÀ connecté et essaie d'aller sur /login -> on l'envoie sur le Dashboard
+    next('/')
+  } else {
+    // Dans tous les autres cas, on le laisse passer
+    next()
+  }
 })
 
 export default router

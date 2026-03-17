@@ -52,7 +52,7 @@ export default {
       // Simulation d'authentification (à remplacer par une vraie API)
       if (this.username && this.password) {
         localStorage.setItem('isAuthenticated', 'true')
-        this.$router.push('/about')
+        this.$router.push('/')
       } else {
         this.error = 'Veuillez remplir tous les champs'
       }
