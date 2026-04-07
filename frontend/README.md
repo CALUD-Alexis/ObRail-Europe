@@ -75,7 +75,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://localhost:8000', // ⚠️ À mettre à jour : devrait correspondre au port d'AdonisJS (3333 par défaut, cf. vue.config.js)
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
       }
