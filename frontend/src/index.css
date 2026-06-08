@@ -1,49 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* ==========================================================================
    CHARTE GRAPHIQUE HYBRIDE : ÉCO (Jour) & TECH (Nuit)
    ========================================================================== */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-:root {
-  --color-primary: #2E7D32;       
-  --color-primary-hover: #1B5E20;
-  --color-primary-light: #E8F5E9; 
-  --color-secondary: #F2EFE9;     
-  --color-day: #E6C665;           
-  --color-day-bg: #FFF8E1;
-  --color-night: #3949AB;         
-  --color-night-bg: #E8EAF6;
-  --color-success: #2E7D32;
-  --color-error: #D84315;
-  --color-info: #0288D1;
-  
-  --color-bg-body: #FAF9F6;       
-  --color-bg-card: #FFFFFF;       
-  --color-text-main: #3E3E3E;     
-  --color-text-muted: #797979;    
-  --color-border: #E0E0E0;
+@layer base {
+  :root {
+    /* Variables d'application */
+    --color-primary: #2E7D32;
+    --color-primary-hover: #1B5E20;
+    --color-primary-light: #E8F5E9;
+    --color-secondary: #F2EFE9;
+    --color-day: #E6C665;
+    --color-day-bg: #FFF8E1;
+    --color-night: #3949AB;
+    --color-night-bg: #E8EAF6;
+    --color-success: #2E7D32;
+    --color-error: #D84315;
+    --color-info: #0288D1;
 
-  --font-main: 'Inter', sans-serif;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --shadow-sm: 0 2px 4px rgba(0,0,0, 0.05);
-}
+    --color-bg-body: #FAF9F6;
+    --color-bg-card: #FFFFFF;
+    --color-text-main: #3E3E3E;
+    --color-text-muted: #797979;
+    --color-border: #E0E0E0;
 
-body.theme-dark {
-  --color-primary: #64B5F6;       
-  --color-bg-body: #0F172A;       
-  --color-bg-card: #1E293B;       
-  --color-text-main: #E2E8F0;     
-  --color-text-muted: #94A3B8;    
-  --color-border: #334155;        
-}
+    --font-main: 'Inter', sans-serif;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --shadow-sm: 0 2px 4px rgba(0,0,0, 0.05);
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+    /* Variables shadcn-vue (HSL — mappées sur la charte graphique) */
+    --background: 40 33% 97%;        /* #FAF9F6 */
+    --foreground: 0 0% 24%;          /* #3E3E3E */
+    --card: 0 0% 100%;               /* #FFFFFF */
+    --card-foreground: 0 0% 24%;     /* #3E3E3E */
+    --primary: 123 43% 34%;          /* #2E7D32 */
+    --primary-foreground: 0 0% 100%; /* blanc */
+    --muted: 0 0% 96%;               /* fond neutre */
+    --muted-foreground: 0 0% 47%;    /* #797979 */
+    --border: 0 0% 88%;              /* #E0E0E0 */
+    --input: 0 0% 88%;               /* #E0E0E0 */
+    --ring: 123 43% 34%;             /* #2E7D32 */
+    --destructive: 14 73% 46%;       /* #D84315 */
+    --destructive-foreground: 0 0% 100%;
+    --radius: 0.75rem;
+  }
 
-body {
-  font-family: var(--font-main);
-  background-color: var(--color-bg-body);
-  color: var(--color-text-main);
-  line-height: 1.6;
+  body.theme-dark {
+    --color-primary: #64B5F6;
+    --color-bg-body: #0F172A;
+    --color-bg-card: #1E293B;
+    --color-text-main: #E2E8F0;
+    --color-text-muted: #94A3B8;
+    --color-border: #334155;
+
+    --background: 222 47% 11%;
+    --foreground: 210 40% 94%;
+    --card: 217 33% 17%;
+    --card-foreground: 210 40% 94%;
+    --primary: 213 93% 68%;
+    --primary-foreground: 0 0% 100%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+    --border: 217 33% 27%;
+    --input: 217 33% 27%;
+  }
+
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: var(--font-main);
+    @apply bg-background text-foreground;
+    line-height: 1.6;
+  }
 }
 
 /* ==========================================================================
@@ -140,7 +179,7 @@ body {
 .alert-info { background-color: #E3F2FD; color: var(--color-info); }
 .alert-error { background-color: #FFEBEE; color: var(--color-error); }
 
-/* Tableaux (Pour la page Trajets) */
+/* Tableaux */
 .data-table {
   width: 100%;
   border-collapse: collapse;
@@ -161,7 +200,7 @@ body {
   background-color: var(--color-bg-body);
 }
 
-/* Placeholders pour les graphiques */
+/* Placeholders graphiques */
 .chart-placeholder {
   min-height: 250px;
   display: flex;
@@ -172,7 +211,7 @@ body {
   background-color: var(--color-bg-body);
 }
 
-/* Sidebar (Rappel) */
+/* Sidebar */
 .sidebar {
   width: 260px;
   height: 100vh;

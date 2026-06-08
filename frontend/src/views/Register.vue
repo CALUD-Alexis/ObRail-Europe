@@ -14,22 +14,29 @@
       <!-- Card -->
       <Card>
         <CardHeader class="space-y-1 pb-4">
-          <CardTitle class="text-2xl font-bold">Connexion</CardTitle>
-          <CardDescription>Accédez à votre espace de suivi</CardDescription>
+          <CardTitle class="text-2xl font-bold">Créer un compte</CardTitle>
+          <CardDescription>Rejoignez le réseau de surveillance ferroviaire</CardDescription>
         </CardHeader>
 
         <CardContent class="space-y-4">
-          <!-- Alertes -->
-          <div v-if="successMessage" class="flex items-start gap-2 rounded-lg bg-primary/10 border border-primary/20 p-3 text-sm text-primary">
-            <CheckCircle class="w-4 h-4 mt-0.5 shrink-0" />
-            {{ successMessage }}
-          </div>
           <div v-if="error" class="flex items-start gap-2 rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive">
             <AlertCircle class="w-4 h-4 mt-0.5 shrink-0" />
             {{ error }}
           </div>
 
-          <form @submit.prevent="handleLogin" class="space-y-4">
+          <form @submit.prevent="handleRegister" class="space-y-4">
+            <div class="space-y-2">
+              <Label for="fullName">Nom complet</Label>
+              <Input
+                id="fullName"
+                v-model="fullName"
+                type="text"
+                placeholder="Jean Dupont"
+                required
+                autocomplete="name"
+              />
+            </div>
+
             <div class="space-y-2">
               <Label for="email">Adresse e-mail</Label>
               <Input
@@ -43,34 +50,42 @@
             </div>
 
             <div class="space-y-2">
-              <div class="flex items-center justify-between">
-                <Label for="password">Mot de passe</Label>
-                <RouterLink to="/forgot-password" class="text-xs text-primary hover:underline font-medium">
-                  Mot de passe oublié ?
-                </RouterLink>
-              </div>
+              <Label for="password">Mot de passe</Label>
               <Input
                 id="password"
                 v-model="password"
                 type="password"
-                placeholder="Votre mot de passe"
+                placeholder="Minimum 8 caractères"
+                minlength="8"
                 required
-                autocomplete="current-password"
+                autocomplete="new-password"
+              />
+            </div>
+
+            <div class="space-y-2">
+              <Label for="confirmPassword">Confirmer le mot de passe</Label>
+              <Input
+                id="confirmPassword"
+                v-model="confirmPassword"
+                type="password"
+                placeholder="Répétez votre mot de passe"
+                required
+                autocomplete="new-password"
               />
             </div>
 
             <Button type="submit" class="w-full" :disabled="loading">
               <Loader2 v-if="loading" class="w-4 h-4 animate-spin" />
-              {{ loading ? 'Connexion...' : 'Se connecter' }}
+              {{ loading ? 'Création du compte...' : 'Créer mon compte' }}
             </Button>
           </form>
         </CardContent>
 
         <CardFooter class="flex justify-center pt-0 pb-6">
           <p class="text-sm text-muted-foreground">
-            Pas encore de compte ?
-            <RouterLink to="/register" class="text-primary hover:underline font-medium ml-1">
-              Créer un compte
+            Déjà un compte ?
+            <RouterLink to="/login" class="text-primary hover:underline font-medium ml-1">
+              Se connecter
             </RouterLink>
           </p>
         </CardFooter>
@@ -83,7 +98,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
-import { TrainFront, AlertCircle, CheckCircle, Loader2 } from 'lucide-vue-next'
+import { TrainFront, AlertCircle, Loader2 } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/authStore'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -93,25 +108,27 @@ import { Label } from '@/components/ui/label'
 const router = useRouter()
 const authStore = useAuthStore()
 
+const fullName = ref('')
 const email = ref('')
 const password = ref('')
+const confirmPassword = ref('')
 const error = ref('')
-const successMessage = ref('')
 const loading = ref(false)
 
-const params = new URLSearchParams(window.location.search)
-if (params.get('registered') === 'true') {
-  successMessage.value = 'Compte créé ! Vérifiez vos e-mails pour confirmer votre adresse.'
-}
-
-async function handleLogin() {
+async function handleRegister() {
   error.value = ''
+
+  if (password.value !== confirmPassword.value) {
+    error.value = 'Les mots de passe ne correspondent pas.'
+    return
+  }
+
   loading.value = true
   try {
-    await authStore.login(email.value, password.value)
-    router.push('/')
+    await authStore.register(email.value, password.value, fullName.value)
+    router.push('/login?registered=true')
   } catch (err) {
-    error.value = err.message || 'Email ou mot de passe incorrect.'
+    error.value = err.message || 'Une erreur est survenue lors de la création du compte.'
   } finally {
     loading.value = false
   }

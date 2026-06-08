@@ -14,22 +14,25 @@
       <!-- Card -->
       <Card>
         <CardHeader class="space-y-1 pb-4">
-          <CardTitle class="text-2xl font-bold">Connexion</CardTitle>
-          <CardDescription>Accédez à votre espace de suivi</CardDescription>
+          <CardTitle class="text-2xl font-bold">Mot de passe oublié</CardTitle>
+          <CardDescription>
+            Saisissez votre adresse e-mail et nous vous enverrons un lien de réinitialisation.
+          </CardDescription>
         </CardHeader>
 
         <CardContent class="space-y-4">
-          <!-- Alertes -->
-          <div v-if="successMessage" class="flex items-start gap-2 rounded-lg bg-primary/10 border border-primary/20 p-3 text-sm text-primary">
-            <CheckCircle class="w-4 h-4 mt-0.5 shrink-0" />
-            {{ successMessage }}
+          <!-- Succès -->
+          <div v-if="successMessage" class="flex items-start gap-3 rounded-lg bg-primary/10 border border-primary/20 p-4 text-sm text-primary">
+            <MailCheck class="w-5 h-5 mt-0.5 shrink-0" />
+            <span>{{ successMessage }}</span>
           </div>
+
           <div v-if="error" class="flex items-start gap-2 rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive">
             <AlertCircle class="w-4 h-4 mt-0.5 shrink-0" />
             {{ error }}
           </div>
 
-          <form @submit.prevent="handleLogin" class="space-y-4">
+          <form v-if="!successMessage" @submit.prevent="handleForgotPassword" class="space-y-4">
             <div class="space-y-2">
               <Label for="email">Adresse e-mail</Label>
               <Input
@@ -42,37 +45,18 @@
               />
             </div>
 
-            <div class="space-y-2">
-              <div class="flex items-center justify-between">
-                <Label for="password">Mot de passe</Label>
-                <RouterLink to="/forgot-password" class="text-xs text-primary hover:underline font-medium">
-                  Mot de passe oublié ?
-                </RouterLink>
-              </div>
-              <Input
-                id="password"
-                v-model="password"
-                type="password"
-                placeholder="Votre mot de passe"
-                required
-                autocomplete="current-password"
-              />
-            </div>
-
             <Button type="submit" class="w-full" :disabled="loading">
               <Loader2 v-if="loading" class="w-4 h-4 animate-spin" />
-              {{ loading ? 'Connexion...' : 'Se connecter' }}
+              {{ loading ? 'Envoi en cours...' : 'Envoyer le lien de réinitialisation' }}
             </Button>
           </form>
         </CardContent>
 
         <CardFooter class="flex justify-center pt-0 pb-6">
-          <p class="text-sm text-muted-foreground">
-            Pas encore de compte ?
-            <RouterLink to="/register" class="text-primary hover:underline font-medium ml-1">
-              Créer un compte
-            </RouterLink>
-          </p>
+          <RouterLink to="/login" class="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors">
+            <ArrowLeft class="w-3.5 h-3.5" />
+            Retour à la connexion
+          </RouterLink>
         </CardFooter>
       </Card>
 
@@ -82,36 +66,29 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useRouter, RouterLink } from 'vue-router'
-import { TrainFront, AlertCircle, CheckCircle, Loader2 } from 'lucide-vue-next'
+import { RouterLink } from 'vue-router'
+import { TrainFront, AlertCircle, MailCheck, Loader2, ArrowLeft } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/authStore'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
-const router = useRouter()
 const authStore = useAuthStore()
 
 const email = ref('')
-const password = ref('')
 const error = ref('')
 const successMessage = ref('')
 const loading = ref(false)
 
-const params = new URLSearchParams(window.location.search)
-if (params.get('registered') === 'true') {
-  successMessage.value = 'Compte créé ! Vérifiez vos e-mails pour confirmer votre adresse.'
-}
-
-async function handleLogin() {
+async function handleForgotPassword() {
   error.value = ''
   loading.value = true
   try {
-    await authStore.login(email.value, password.value)
-    router.push('/')
+    await authStore.sendPasswordResetEmail(email.value)
+    successMessage.value = `Un e-mail de réinitialisation a été envoyé à ${email.value}. Vérifiez également vos spams.`
   } catch (err) {
-    error.value = err.message || 'Email ou mot de passe incorrect.'
+    error.value = err.message || 'Une erreur est survenue. Veuillez réessayer.'
   } finally {
     loading.value = false
   }
