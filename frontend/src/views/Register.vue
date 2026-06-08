@@ -128,7 +128,16 @@ async function handleRegister() {
     await authStore.register(email.value, password.value, fullName.value)
     router.push('/login?registered=true')
   } catch (err) {
-    error.value = err.message || 'Une erreur est survenue lors de la création du compte.'
+    const status = err.status ?? err?.code
+    const msg = err.message?.toLowerCase() ?? ''
+
+    if ([500, 502, 503, 504].includes(status) || msg.includes('unexpected') || msg.includes('timeout')) {
+      error.value = "Une erreur est survenue. Veuillez réessayer."
+    } else if (msg.includes('already registered') || msg.includes('user already registered')) {
+      error.value = 'Cette adresse e-mail est déjà utilisée.'
+    } else {
+      error.value = err.message || 'Une erreur est survenue lors de la création du compte.'
+    }
   } finally {
     loading.value = false
   }

@@ -27,9 +27,9 @@
       <div class="sidebar-item disabled" title="Bientôt disponible">
         Administration
       </div>
-      <router-link to="/about" class="sidebar-item">
+      <div class="sidebar-item disabled" title="Bientôt disponible">
         À propos
-      </router-link>
+      </div>
     </nav>
 
     <div class="sidebar-footer">

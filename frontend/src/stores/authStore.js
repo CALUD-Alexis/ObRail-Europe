@@ -45,15 +45,6 @@ export const useAuthStore = defineStore('auth', () => {
     session.value = null
   }
 
-  // Déclenche l'envoi de l'email de réinitialisation (via Resend si configuré dans Supabase)
-  async function sendPasswordResetEmail(email) {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`
-    })
-    if (error) throw error
-  }
-
-  // Mise à jour du mot de passe après clic sur le lien
   async function updatePassword(newPassword) {
     const { error } = await supabase.auth.updateUser({ password: newPassword })
     if (error) throw error
@@ -69,7 +60,6 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     register,
     logout,
-    sendPasswordResetEmail,
     updatePassword
   }
 })
