@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { operateurService } from '@/api/services'
 
 /**
  * Store pour gérer les opérateurs ferroviaires
@@ -77,13 +78,11 @@ export const useOperateurStore = defineStore('operateur', () => {
   async function fetchOperateurs() {
     loading.value = true
     error.value = null
-
     try {
-      const response = await fetch('/api/operateurs')
-      const data = await response.json()
-      operateurs.value = data
+      const data = await operateurService.getAll()
+      operateurs.value = Array.isArray(data) ? data : (data.data ?? [])
     } catch (err) {
-      error.value = err.message
+      error.value = err.message || 'Erreur lors du chargement des opérateurs'
       console.error('Erreur chargement opérateurs:', err)
     } finally {
       loading.value = false
@@ -93,14 +92,10 @@ export const useOperateurStore = defineStore('operateur', () => {
   async function fetchOperateurDetails(id) {
     loading.value = true
     error.value = null
-
     try {
-      const response = await fetch(`/api/operateurs/${id}/details`)
-      const data = await response.json()
-      operateurDetails.value = data
-      // Détails incluent : infos complètes, historique, statistiques, contacts
+      operateurDetails.value = await operateurService.getById(id)
     } catch (err) {
-      error.value = err.message
+      error.value = err.message || 'Erreur lors du chargement des détails opérateur'
       console.error('Erreur chargement détails opérateur:', err)
     } finally {
       loading.value = false
@@ -129,14 +124,8 @@ export const useOperateurStore = defineStore('operateur', () => {
   async function addOperateur(operateurData) {
     loading.value = true
     error.value = null
-
     try {
-      const response = await fetch('/api/operateurs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(operateurData)
-      })
-      const newOperateur = await response.json()
+      const newOperateur = await operateurService.create(operateurData)
       operateurs.value.push(newOperateur)
       return newOperateur
     } catch (err) {
@@ -150,19 +139,10 @@ export const useOperateurStore = defineStore('operateur', () => {
   async function updateOperateur(id, updates) {
     loading.value = true
     error.value = null
-
     try {
-      const response = await fetch(`/api/operateurs/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates)
-      })
-      const updatedOperateur = await response.json()
-
+      const updatedOperateur = await operateurService.update(id, updates)
       const index = operateurs.value.findIndex(o => o.id === id)
-      if (index !== -1) {
-        operateurs.value[index] = updatedOperateur
-      }
+      if (index !== -1) operateurs.value[index] = updatedOperateur
       return updatedOperateur
     } catch (err) {
       error.value = err.message
@@ -175,9 +155,8 @@ export const useOperateurStore = defineStore('operateur', () => {
   async function deleteOperateur(id) {
     loading.value = true
     error.value = null
-
     try {
-      await fetch(`/api/operateurs/${id}`, { method: 'DELETE' })
+      await operateurService.delete(id)
       operateurs.value = operateurs.value.filter(o => o.id !== id)
     } catch (err) {
       error.value = err.message

@@ -46,8 +46,8 @@ export const trajetService = {
   /**
    * Récupérer tous les trajets
    */
-  async getAll() {
-    const response = await apiClient.get('/trajets')
+  async getAll(params = {}) {
+    const response = await apiClient.get('/trajets', { params })
     return response.data
   },
 
@@ -125,6 +125,106 @@ export const stationService = {
    */
   async search(query) {
     const response = await apiClient.get('/stations/search', { params: { q: query } })
+    return response.data
+  }
+}
+
+/**
+ * Service des gares
+ */
+export const gareService = {
+  async getAll(params = {}) {
+    const response = await apiClient.get('/gares', { params })
+    return response.data
+  },
+  async getById(id) {
+    const response = await apiClient.get(`/gares/${id}`)
+    return response.data
+  },
+  async create(data) {
+    const response = await apiClient.post('/gares', data)
+    return response.data
+  },
+  async update(id, data) {
+    const response = await apiClient.put(`/gares/${id}`, data)
+    return response.data
+  },
+  async delete(id) {
+    await apiClient.delete(`/gares/${id}`)
+  }
+}
+
+/**
+ * Service des opérateurs
+ */
+export const operateurService = {
+  async getAll(params = {}) {
+    const response = await apiClient.get('/operateurs', { params })
+    return response.data
+  },
+  async getById(id) {
+    const response = await apiClient.get(`/operateurs/${id}`)
+    return response.data
+  },
+  async create(data) {
+    const response = await apiClient.post('/operateurs', data)
+    return response.data
+  },
+  async update(id, data) {
+    const response = await apiClient.put(`/operateurs/${id}`, data)
+    return response.data
+  },
+  async delete(id) {
+    await apiClient.delete(`/operateurs/${id}`)
+  }
+}
+
+/**
+ * Service d'administration
+ */
+export const adminService = {
+  async getUsers(params = {}) {
+    const response = await apiClient.get('/admin/users', { params })
+    return response.data
+  },
+  async createUser(data) {
+    const response = await apiClient.post('/admin/users', data)
+    return response.data
+  },
+  async updateUser(id, data) {
+    const response = await apiClient.put(`/admin/users/${id}`, data)
+    return response.data
+  },
+  async deleteUser(id) {
+    await apiClient.delete(`/admin/users/${id}`)
+  },
+  async getSystemStatus() {
+    const response = await apiClient.get('/admin/monitoring/status')
+    return response.data
+  },
+  async getLogs(params = {}) {
+    const response = await apiClient.get('/admin/monitoring/logs', { params })
+    return response.data
+  },
+  async getMetrics(params = {}) {
+    const response = await apiClient.get('/admin/monitoring/metrics', { params })
+    return response.data
+  },
+  async getAlerts() {
+    const response = await apiClient.get('/admin/monitoring/alerts')
+    return response.data
+  },
+  async resolveAlert(id) {
+    await apiClient.post(`/admin/monitoring/alerts/${id}/resolve`)
+  }
+}
+
+/**
+ * Service des statistiques
+ */
+export const statsService = {
+  async getVolumes() {
+    const response = await apiClient.get('/stats/volumes')
     return response.data
   }
 }

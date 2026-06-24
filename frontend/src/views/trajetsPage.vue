@@ -22,38 +22,43 @@
     </div>
 
     <div v-if="trajetStore.loading" class="alert alert-info">Chargement...</div>
+    <div v-if="trajetStore.error" class="alert alert-error">⚠️ {{ trajetStore.error }}</div>
 
     <div class="card p-0" v-if="!trajetStore.loading && trajetStore.filteredTrajets.length > 0">
       <table class="data-table">
         <thead>
           <tr>
-            <th>N° Trajet</th>
+            <th>N° Train</th>
             <th>Type</th>
             <th>Départ</th>
             <th>Arrivée</th>
             <th>Opérateur</th>
-            <th>Statut</th>
+            <th>Durée</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="trajet in trajetStore.filteredTrajets" :key="trajet.trip_id">
-            <td class="font-bold text-primary">{{ trajet.trip_id }} ({{ trajet.route_name }})</td>
+          <tr v-for="trajet in trajetStore.filteredTrajets" :key="trajet.id">
+            <td class="font-bold text-primary">{{ trajet.train_number || `#${trajet.id}` }}</td>
             <td>
-               <span :class="['badge', trajet.service_type?.toLowerCase() === 'nuit' ? 'badge-night' : 'badge-day']">
-                 {{ trajet.service_type || 'Jour' }}
-               </span>
+              <span :class="['badge', trajet.train_type === 'night' ? 'badge-night' : 'badge-day']">
+                {{ trajet.train_type === 'night' ? '🌙 Nuit' : '☀️ Jour' }}
+              </span>
             </td>
-            <td>{{ trajet.origin_station }}</td>
-            <td>{{ trajet.destination_station }}</td>
-            <td>{{ trajet.agency_id }}</td>
-            <td><span class="badge badge-success">{{ trajet.status }}</span></td>
+            <td>{{ trajet.departure_station }}</td>
+            <td>{{ trajet.arrival_station }}</td>
+            <td>{{ trajet.operator }}</td>
+            <td>{{ formatDuration(trajet.duration_minutes) }}</td>
             <td>
-              <button @click="viewDetails(trajet.trip_id)" class="btn btn-secondary btn-sm">Détails</button>
+              <button @click="viewDetails(trajet.id)" class="btn btn-secondary btn-sm">Détails</button>
             </td>
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <div v-if="!trajetStore.loading && trajetStore.filteredTrajets.length === 0 && !trajetStore.error" class="alert alert-info">
+      Aucun trajet trouvé.
     </div>
   </div>
 </template>
@@ -73,6 +78,13 @@ let searchTimeout
 function handleSearch() {
   clearTimeout(searchTimeout)
   searchTimeout = setTimeout(() => trajetStore.searchTrajets(searchQuery.value), 300)
+}
+
+function formatDuration(minutes) {
+  if (!minutes) return '-'
+  const h = Math.floor(minutes / 60)
+  const m = minutes % 60
+  return h > 0 ? `${h}h ${m}m` : `${m}m`
 }
 
 function viewDetails(id) { router.push(`/trajets/${id}`) }

@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { adminService } from '@/api/services'
 
 /**
  * Store pour l'administration
@@ -100,13 +101,11 @@ export const useAdminStore = defineStore('admin', () => {
   async function fetchUsers() {
     userLoading.value = true
     userError.value = null
-
     try {
-      const response = await fetch('/api/admin/users')
-      const data = await response.json()
-      users.value = data
+      const data = await adminService.getUsers()
+      users.value = Array.isArray(data) ? data : (data.data ?? [])
     } catch (err) {
-      userError.value = err.message
+      userError.value = err.message || 'Erreur lors du chargement des utilisateurs'
       console.error('Erreur chargement utilisateurs:', err)
     } finally {
       userLoading.value = false
@@ -116,14 +115,8 @@ export const useAdminStore = defineStore('admin', () => {
   async function addUser(userData) {
     userLoading.value = true
     userError.value = null
-
     try {
-      const response = await fetch('/api/admin/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData)
-      })
-      const newUser = await response.json()
+      const newUser = await adminService.createUser(userData)
       users.value.push(newUser)
       return newUser
     } catch (err) {
@@ -137,19 +130,10 @@ export const useAdminStore = defineStore('admin', () => {
   async function updateUser(id, updates) {
     userLoading.value = true
     userError.value = null
-
     try {
-      const response = await fetch(`/api/admin/users/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates)
-      })
-      const updatedUser = await response.json()
-
+      const updatedUser = await adminService.updateUser(id, updates)
       const index = users.value.findIndex(u => u.id === id)
-      if (index !== -1) {
-        users.value[index] = updatedUser
-      }
+      if (index !== -1) users.value[index] = updatedUser
       return updatedUser
     } catch (err) {
       userError.value = err.message
@@ -162,9 +146,8 @@ export const useAdminStore = defineStore('admin', () => {
   async function deleteUser(id) {
     userLoading.value = true
     userError.value = null
-
     try {
-      await fetch(`/api/admin/users/${id}`, { method: 'DELETE' })
+      await adminService.deleteUser(id)
       users.value = users.value.filter(u => u.id !== id)
     } catch (err) {
       userError.value = err.message
@@ -205,13 +188,10 @@ export const useAdminStore = defineStore('admin', () => {
   async function fetchSystemStatus() {
     monitoringLoading.value = true
     monitoringError.value = null
-
     try {
-      const response = await fetch('/api/admin/monitoring/status')
-      const data = await response.json()
-      systemStatus.value = data
+      systemStatus.value = await adminService.getSystemStatus()
     } catch (err) {
-      monitoringError.value = err.message
+      monitoringError.value = err.message || 'Erreur chargement statut système'
       console.error('Erreur chargement status système:', err)
     } finally {
       monitoringLoading.value = false
@@ -221,16 +201,10 @@ export const useAdminStore = defineStore('admin', () => {
   async function fetchLogs(limit = 100, level = null) {
     monitoringLoading.value = true
     monitoringError.value = null
-
     try {
-      const params = new URLSearchParams({ limit })
-      if (level) params.append('level', level)
-      
-      const response = await fetch(`/api/admin/monitoring/logs?${params}`)
-      const data = await response.json()
-      logs.value = data
+      logs.value = await adminService.getLogs({ limit, ...(level ? { level } : {}) })
     } catch (err) {
-      monitoringError.value = err.message
+      monitoringError.value = err.message || 'Erreur chargement logs'
       console.error('Erreur chargement logs:', err)
     } finally {
       monitoringLoading.value = false
@@ -240,13 +214,10 @@ export const useAdminStore = defineStore('admin', () => {
   async function fetchMetrics(period = '24h') {
     monitoringLoading.value = true
     monitoringError.value = null
-
     try {
-      const response = await fetch(`/api/admin/monitoring/metrics?period=${period}`)
-      const data = await response.json()
-      metrics.value = data
+      metrics.value = await adminService.getMetrics({ period })
     } catch (err) {
-      monitoringError.value = err.message
+      monitoringError.value = err.message || 'Erreur chargement métriques'
       console.error('Erreur chargement métriques:', err)
     } finally {
       monitoringLoading.value = false
@@ -256,13 +227,10 @@ export const useAdminStore = defineStore('admin', () => {
   async function fetchAlerts() {
     monitoringLoading.value = true
     monitoringError.value = null
-
     try {
-      const response = await fetch('/api/admin/monitoring/alerts')
-      const data = await response.json()
-      alerts.value = data
+      alerts.value = await adminService.getAlerts()
     } catch (err) {
-      monitoringError.value = err.message
+      monitoringError.value = err.message || 'Erreur chargement alertes'
       console.error('Erreur chargement alertes:', err)
     } finally {
       monitoringLoading.value = false
@@ -272,12 +240,8 @@ export const useAdminStore = defineStore('admin', () => {
   async function resolveAlert(alertId) {
     monitoringLoading.value = true
     monitoringError.value = null
-
     try {
-      await fetch(`/api/admin/monitoring/alerts/${alertId}/resolve`, {
-        method: 'POST'
-      })
-      
+      await adminService.resolveAlert(alertId)
       const index = alerts.value.findIndex(a => a.id === alertId)
       if (index !== -1) {
         alerts.value[index].resolved = true

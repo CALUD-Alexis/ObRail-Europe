@@ -1,112 +1,54 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { statsService } from '@/api/services'
 
-/**
- * Store pour gérer le Dashboard avec statistiques et graphiques
- * Route suggérée : /stats/dashboard
- */
 export const useDashboardStore = defineStore('dashboard', () => {
-  // État
   const stats = ref({
     totalTrajets: 0,
     trajetsActifs: 0,
     totalGares: 0,
     totalOperateurs: 0,
-    consommationJour: 0,
-    consommationMois: 0,
-    consommationAnnee: 0
+    durationAvgMinutes: 0,
+    priceAvg: null
   })
 
-  const consommationData = ref([])
-  const trajetsParMois = ref([])
   const repartitionOperateurs = ref([])
+  const repartitionTypes = ref([])
+  const repartitionPays = ref([])
   const loading = ref(false)
   const error = ref(null)
 
-  // Getters
   const tauxUtilisation = computed(() => {
     if (stats.value.totalTrajets === 0) return 0
     return Math.round((stats.value.trajetsActifs / stats.value.totalTrajets) * 100)
   })
 
-  const consommationMoyenne = computed(() => {
-    if (consommationData.value.length === 0) return 0
-    const total = consommationData.value.reduce((sum, item) => sum + item.value, 0)
-    return (total / consommationData.value.length).toFixed(2)
-  })
-
-  // Actions
   async function fetchDashboardStats() {
     loading.value = true
     error.value = null
-
     try {
-      const response = await fetch('/api/dashboard/stats')
-      const data = await response.json()
-      stats.value = data
+      const data = await statsService.getVolumes()
+      stats.value = {
+        totalTrajets: data.total,
+        trajetsActifs: data.total,
+        totalGares: 0,
+        totalOperateurs: data.byOperator?.length || 0,
+        durationAvgMinutes: data.averages?.durationMinutes || 0,
+        priceAvg: data.averages?.price || null
+      }
+      repartitionOperateurs.value = data.byOperator || []
+      repartitionTypes.value = data.byTrainType || []
+      repartitionPays.value = data.byDepartureCountry || []
     } catch (err) {
-      error.value = err.message
+      error.value = err.message || 'Erreur lors du chargement des statistiques'
       console.error('Erreur chargement stats:', err)
     } finally {
       loading.value = false
     }
   }
 
-  async function fetchConsommationData(period = 'month') {
-    loading.value = true
-    error.value = null
-
-    try {
-      const response = await fetch(`/api/dashboard/consommation?period=${period}`)
-      const data = await response.json()
-      consommationData.value = data
-    } catch (err) {
-      error.value = err.message
-      console.error('Erreur chargement consommation:', err)
-    } finally {
-      loading.value = false
-    }
-  }
-
-  async function fetchTrajetsParMois() {
-    loading.value = true
-    error.value = null
-
-    try {
-      const response = await fetch('/api/dashboard/trajets-par-mois')
-      const data = await response.json()
-      trajetsParMois.value = data
-    } catch (err) {
-      error.value = err.message
-      console.error('Erreur chargement trajets par mois:', err)
-    } finally {
-      loading.value = false
-    }
-  }
-
-  async function fetchRepartitionOperateurs() {
-    loading.value = true
-    error.value = null
-
-    try {
-      const response = await fetch('/api/dashboard/operateurs-repartition')
-      const data = await response.json()
-      repartitionOperateurs.value = data
-    } catch (err) {
-      error.value = err.message
-      console.error('Erreur chargement répartition opérateurs:', err)
-    } finally {
-      loading.value = false
-    }
-  }
-
   async function loadAllDashboardData() {
-    await Promise.all([
-      fetchDashboardStats(),
-      fetchConsommationData(),
-      fetchTrajetsParMois(),
-      fetchRepartitionOperateurs()
-    ])
+    await fetchDashboardStats()
   }
 
   function resetStore() {
@@ -115,35 +57,25 @@ export const useDashboardStore = defineStore('dashboard', () => {
       trajetsActifs: 0,
       totalGares: 0,
       totalOperateurs: 0,
-      consommationJour: 0,
-      consommationMois: 0,
-      consommationAnnee: 0
+      durationAvgMinutes: 0,
+      priceAvg: null
     }
-    consommationData.value = []
-    trajetsParMois.value = []
     repartitionOperateurs.value = []
+    repartitionTypes.value = []
+    repartitionPays.value = []
     loading.value = false
     error.value = null
   }
 
   return {
-    // State
     stats,
-    consommationData,
-    trajetsParMois,
     repartitionOperateurs,
+    repartitionTypes,
+    repartitionPays,
     loading,
     error,
-
-    // Getters
     tauxUtilisation,
-    consommationMoyenne,
-
-    // Actions
     fetchDashboardStats,
-    fetchConsommationData,
-    fetchTrajetsParMois,
-    fetchRepartitionOperateurs,
     loadAllDashboardData,
     resetStore
   }

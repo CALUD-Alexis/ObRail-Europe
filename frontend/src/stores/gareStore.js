@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { gareService } from '@/api/services'
 
 /**
  * Store pour gérer les gares
@@ -103,13 +104,11 @@ export const useGareStore = defineStore('gare', () => {
   async function fetchGares() {
     loading.value = true
     error.value = null
-
     try {
-      const response = await fetch('/api/gares')
-      const data = await response.json()
-      gares.value = data
+      const data = await gareService.getAll()
+      gares.value = Array.isArray(data) ? data : (data.data ?? [])
     } catch (err) {
-      error.value = err.message
+      error.value = err.message || 'Erreur lors du chargement des gares'
       console.error('Erreur chargement gares:', err)
     } finally {
       loading.value = false
@@ -119,14 +118,10 @@ export const useGareStore = defineStore('gare', () => {
   async function fetchGareDetails(id) {
     loading.value = true
     error.value = null
-
     try {
-      const response = await fetch(`/api/gares/${id}/details`)
-      const data = await response.json()
-      gareDetails.value = data
-      // Détails incluent : coordonnées GPS, équipements, horaires, connexions
+      gareDetails.value = await gareService.getById(id)
     } catch (err) {
-      error.value = err.message
+      error.value = err.message || 'Erreur lors du chargement des détails de la gare'
       console.error('Erreur chargement détails gare:', err)
     } finally {
       loading.value = false
@@ -156,14 +151,8 @@ export const useGareStore = defineStore('gare', () => {
   async function addGare(gareData) {
     loading.value = true
     error.value = null
-
     try {
-      const response = await fetch('/api/gares', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(gareData)
-      })
-      const newGare = await response.json()
+      const newGare = await gareService.create(gareData)
       gares.value.push(newGare)
       return newGare
     } catch (err) {
@@ -177,19 +166,10 @@ export const useGareStore = defineStore('gare', () => {
   async function updateGare(id, updates) {
     loading.value = true
     error.value = null
-
     try {
-      const response = await fetch(`/api/gares/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates)
-      })
-      const updatedGare = await response.json()
-
+      const updatedGare = await gareService.update(id, updates)
       const index = gares.value.findIndex(g => g.id === id)
-      if (index !== -1) {
-        gares.value[index] = updatedGare
-      }
+      if (index !== -1) gares.value[index] = updatedGare
       return updatedGare
     } catch (err) {
       error.value = err.message
@@ -202,9 +182,8 @@ export const useGareStore = defineStore('gare', () => {
   async function deleteGare(id) {
     loading.value = true
     error.value = null
-
     try {
-      await fetch(`/api/gares/${id}`, { method: 'DELETE' })
+      await gareService.delete(id)
       gares.value = gares.value.filter(g => g.id !== id)
     } catch (err) {
       error.value = err.message

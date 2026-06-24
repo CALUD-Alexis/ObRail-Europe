@@ -104,7 +104,7 @@
       </div>
 
       <!-- Arrêts intermédiaires -->
-      <div class="section-card" v-if="trajetStore.trajetDetails.arrets">
+      <div class="section-card" v-if="trajetStore.trajetDetails.arrets?.length">
         <h2>🚉 Arrêts Intermédiaires</h2>
         <div class="stops-timeline">
           <div 
@@ -161,13 +161,16 @@ onMounted(() => {
   trajetStore.fetchTrajetDetails(trajetId)
 })
 
-// Formater l'heure
+// Formater l'heure (supporte ISO et HH:MM:SS)
 function formatTime(timeString) {
   if (!timeString) return '-'
-  return new Date(timeString).toLocaleTimeString('fr-FR', {
-    hour: '2-digit',
-    minute: '2-digit'
-  })
+  // Format HH:MM:SS direct (pas de date)
+  if (/^\d{2}:\d{2}(:\d{2})?$/.test(timeString)) {
+    return timeString.slice(0, 5)
+  }
+  const date = new Date(timeString)
+  if (isNaN(date.getTime())) return timeString
+  return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
 }
 
 // Retour à la liste
