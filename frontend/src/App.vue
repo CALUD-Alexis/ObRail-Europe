@@ -1,8 +1,10 @@
 <template>
   <div class="app-layout">
+    <!-- RGAA 12.6 : zone de navigation identifiée -->
     <Sidebar v-if="!isLoginPage" />
-    
-    <main class="main-content">
+
+    <!-- RGAA 12.1 : cible du lien d'évitement + role="main" -->
+    <main id="main-content" class="main-content" role="main">
       <router-view />
     </main>
   </div>

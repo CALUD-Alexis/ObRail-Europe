@@ -7,10 +7,18 @@ services:
     depends_on:
       - db
     environment:
+      TZ: UTC
+      PORT: 3333
+      HOST: 0.0.0.0
+      NODE_ENV: production
+      LOG_LEVEL: info
+      APP_KEY: paKXSmXmVKDmjnIjECmHCZMmWOBpkSzN
       DB_HOST: db
+      DB_PORT: 5432
       DB_USER: postgres
       DB_PASSWORD: postgres
-      DB_NAME: obrail_db
+      DB_DATABASE: obrail_db
+      SESSION_DRIVER: cookie
     volumes:
       - ./backend:/app
 
@@ -23,25 +31,50 @@ services:
       - backend
 
   db:
-    image: postgres:15
+    image: postgres:16
     container_name: db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: obrail_db
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    depends_on:
+      - backend
 
   grafana:
-    image: grafana/grafana       # ← Ici, on laisse Docker prendre la dernière version
+    image: grafana/grafana:11.1.0
     container_name: grafana
     ports:
       - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
     volumes:
       - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+    depends_on:
+      - prometheus
 
 volumes:
   db_data:
   grafana_data:
+  prometheus_data:

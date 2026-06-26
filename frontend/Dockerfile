@@ -20,10 +20,10 @@ RUN npm run build
 FROM nginx:alpine
 
 # Copier le build depuis l'étape précédente
-COPY --from=build /app/build /usr/share/nginx/html
+COPY --from=build /app/dist /usr/share/nginx/html
 
-# Copier le fichier de config Nginx si nécessaire (optionnel)
-# COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Config nginx pour le routing SPA (Vue Router)
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Exposer le port 80
 EXPOSE 80

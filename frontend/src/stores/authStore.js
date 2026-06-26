@@ -1,13 +1,25 @@
-import { useAuthStore } from '@/stores/authStore'
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
 
-const authStore = useAuthStore()
+// Gère l'état de connexion de l'utilisateur
+// L'authentification est simulée : n'importe quels identifiants non vides sont acceptés
+export const useAuthStore = defineStore('auth', () => {
+  // On lit localStorage au démarrage pour survivre aux rechargements de page
+  const isAuthenticated = ref(localStorage.getItem('isAuthenticated') === 'true')
 
-// État
-authStore.user          // Utilisateur connecté
-authStore.token         // Token d'authentification
-authStore.isAuthenticated  // Boolean
+  // Connecte l'utilisateur — retourne false si les champs sont vides
+  function login(username, password) {
+    if (!username || !password) return false
+    isAuthenticated.value = true
+    localStorage.setItem('isAuthenticated', 'true')
+    return true
+  }
 
-// Actions
-await authStore.login({ email, password })
-await authStore.logout()
-await authStore.fetchCurrentUser()
+  // Déconnecte l'utilisateur et nettoie le stockage local
+  function logout() {
+    isAuthenticated.value = false
+    localStorage.removeItem('isAuthenticated')
+  }
+
+  return { isAuthenticated, login, logout }
+})

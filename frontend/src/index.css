@@ -1,42 +1,73 @@
 /* ==========================================================================
-   CHARTE GRAPHIQUE HYBRIDE : ÉCO (Jour) & TECH (Nuit)
+   VARIABLES GLOBALES — Charte graphique ObRail Europe
+   Éco (vert) pour les trains de jour, Tech (bleu) pour les trains de nuit
    ========================================================================== */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --color-primary: #2E7D32;       
+  /* Couleurs principales */
+  --color-primary:       #2E7D32;   /* vert forêt — trains de jour, actions principales */
   --color-primary-hover: #1B5E20;
-  --color-primary-light: #E8F5E9; 
-  --color-secondary: #F2EFE9;     
-  --color-day: #E6C665;           
-  --color-day-bg: #FFF8E1;
-  --color-night: #3949AB;         
-  --color-night-bg: #E8EAF6;
-  --color-success: #2E7D32;
-  --color-error: #D84315;
-  --color-info: #0288D1;
-  
-  --color-bg-body: #FAF9F6;       
-  --color-bg-card: #FFFFFF;       
-  --color-text-main: #3E3E3E;     
-  --color-text-muted: #797979;    
-  --color-border: #E0E0E0;
+  --color-primary-light: #E8F5E9;   /* fond vert pâle pour highlights */
 
-  --font-main: 'Inter', sans-serif;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --shadow-sm: 0 2px 4px rgba(0,0,0, 0.05);
+  /* Couleurs sémantiques */
+  --color-day:           #E6C665;   /* or — badge "Jour" */
+  --color-day-bg:        #FFF8E1;
+  --color-night:         #3949AB;   /* bleu saphir — badge "Nuit" */
+  --color-night-bg:      #E8EAF6;
+  --color-error:         #D84315;
+  --color-info:          #0288D1;
+
+  /* Surfaces et textes */
+  --color-bg-body:   #FAF9F6;
+  --color-bg-card:   #FFFFFF;
+  --color-text-main: #3E3E3E;
+  --color-text-muted:#797979;
+  --color-border:    #E0E0E0;
+
+  /* Typographie et formes */
+  --font-main:  'Inter', sans-serif;
+  --radius-sm:  8px;
+  --radius-md:  12px;
+  --shadow-sm:  0 2px 4px rgba(0,0,0, 0.05);
 }
 
+/* Mode sombre — activé en ajoutant class="theme-dark" sur <body> */
 body.theme-dark {
-  --color-primary: #64B5F6;       
-  --color-bg-body: #0F172A;       
-  --color-bg-card: #1E293B;       
-  --color-text-main: #E2E8F0;     
-  --color-text-muted: #94A3B8;    
-  --color-border: #334155;        
+  --color-primary:    #64B5F6;
+  --color-bg-body:    #0F172A;
+  --color-bg-card:    #1E293B;
+  --color-text-main:  #E2E8F0;
+  --color-text-muted: #94A3B8;
+  --color-border:     #334155;
 }
 
+/* ==========================================================================
+   RGAA — Accessibilité
+   ========================================================================== */
+
+/* Lien d'évitement (RGAA 12.1) : invisible sauf au focus clavier */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  background: var(--color-primary);
+  color: white;
+  padding: 10px 20px;
+  font-weight: 600;
+  z-index: 9999;
+  border-radius: 0 0 var(--radius-sm) 0;
+  text-decoration: none;
+}
+.skip-link:focus { top: 0; }
+
+/* Focus visible (RGAA 10.7) : contour clair sur tous les éléments interactifs */
+:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Reset minimal */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -48,6 +79,7 @@ body {
 
 /* ==========================================================================
    LAYOUT PRINCIPAL
+   Structure : sidebar fixe à gauche + contenu scrollable à droite
    ========================================================================== */
 .app-layout {
   display: flex;
@@ -65,6 +97,7 @@ body {
   margin: 0 auto;
 }
 
+/* En-tête de page : titre à gauche, bouton d'action à droite */
 .page-header {
   display: flex;
   justify-content: space-between;
@@ -73,106 +106,8 @@ body {
 }
 
 /* ==========================================================================
-   COMPOSANTS REUTILISABLES
+   SIDEBAR
    ========================================================================== */
-.card {
-  background-color: var(--color-bg-card);
-  border-radius: var(--radius-md);
-  padding: 24px;
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-sm);
-}
-
-.card.p-0 { padding: 0; }
-.bg-success { background-color: var(--color-success); }
-.bg-primary { background-color: var(--color-primary); }
-.text-white { color: white; }
-.text-center { text-align: center; }
-.text-muted { color: var(--color-text-muted); }
-.text-primary { color: var(--color-primary); }
-.text-night { color: var(--color-night); }
-.text-xl { font-size: 2rem; }
-.text-lg { font-size: 1.5rem; }
-.font-bold { font-weight: bold; }
-
-/* Grilles */
-.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
-.grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-
-/* Marges */
-.mb-2 { margin-bottom: 24px; }
-.mt-2 { margin-top: 16px; }
-
-/* Boutons */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 20px;
-  border-radius: var(--radius-sm);
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  gap: 8px;
-}
-.btn-primary { background-color: var(--color-primary); color: white; }
-.btn-secondary { background-color: transparent; border: 1px solid var(--color-border); color: var(--color-text-main); }
-.btn-sm { padding: 6px 12px; font-size: 0.85rem; }
-
-/* Badges */
-.badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
-.badge-day { background-color: var(--color-day-bg); color: var(--color-day); }
-.badge-night { background-color: var(--color-night-bg); color: var(--color-night); }
-.badge-success { background-color: var(--color-primary-light); color: var(--color-success); }
-
-/* Formulaires */
-.form-input, .form-select {
-  width: 100%;
-  padding: 10px 15px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-  background-color: var(--color-bg-card);
-  color: var(--color-text-main);
-}
-
-/* Alertes */
-.alert { padding: 15px; border-radius: var(--radius-sm); margin-bottom: 20px; }
-.alert-info { background-color: #E3F2FD; color: var(--color-info); }
-.alert-error { background-color: #FFEBEE; color: var(--color-error); }
-
-/* Tableaux (Pour la page Trajets) */
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-.data-table th {
-  background-color: var(--color-bg-body);
-  padding: 15px;
-  text-align: left;
-  font-weight: 600;
-  color: var(--color-text-muted);
-  border-bottom: 2px solid var(--color-border);
-}
-.data-table td {
-  padding: 15px;
-  border-bottom: 1px solid var(--color-border);
-}
-.data-table tbody tr:hover {
-  background-color: var(--color-bg-body);
-}
-
-/* Placeholders pour les graphiques */
-.chart-placeholder {
-  min-height: 250px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  border: 2px dashed var(--color-border);
-  background-color: var(--color-bg-body);
-}
-
-/* Sidebar (Rappel) */
 .sidebar {
   width: 260px;
   height: 100vh;
@@ -184,8 +119,181 @@ body {
   position: sticky;
   top: 0;
 }
-.sidebar-logo { font-size: 1.25rem; font-weight: 700; color: var(--color-primary); margin-bottom: 40px; }
-.sidebar-nav { display: flex; flex-direction: column; gap: 8px; }
-.sidebar-item { padding: 12px 16px; border-radius: var(--radius-sm); color: var(--color-text-muted); text-decoration: none; font-weight: 500; display: block; }
-.sidebar-item:hover, .sidebar-item.router-link-active { background-color: var(--color-primary-light); color: var(--color-primary); }
-.sidebar-footer { margin-top: auto; padding-bottom: 20px; }
+
+.sidebar-logo {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 40px;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Les router-link actifs reçoivent automatiquement .router-link-active */
+.sidebar-item {
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  font-weight: 500;
+  display: block;
+  transition: background-color 0.15s, color 0.15s;
+}
+.sidebar-item:hover,
+.sidebar-item.router-link-active {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding-bottom: 20px;
+}
+
+/* ==========================================================================
+   PAGE DE LOGIN
+   ========================================================================== */
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg-body);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 440px;
+}
+
+/* Espacement entre label et input */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+/* ==========================================================================
+   COMPOSANTS RÉUTILISABLES
+   ========================================================================== */
+
+/* Carte blanche avec ombre légère */
+.card {
+  background-color: var(--color-bg-card);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+.card.p-0 { padding: 0; }    /* Carte sans padding — pour les tableaux pleine largeur */
+.card.p-2 { padding: 16px; } /* Carte avec padding réduit */
+
+/* Grilles responsive — s'adaptent automatiquement à la largeur disponible */
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
+.grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+
+/* Utilitaires de marge */
+.mb-2 { margin-bottom: 24px; }
+.mt-1 { margin-top:  8px; }
+.mt-2 { margin-top:  16px; }
+
+/* ==========================================================================
+   BOUTONS
+   ========================================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  gap: 8px;
+  transition: opacity 0.15s, background-color 0.15s;
+}
+.btn:hover:not(:disabled) { opacity: 0.85; }
+.btn:active:not(:disabled) { opacity: 0.7; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-primary   { background-color: var(--color-primary); color: white; }
+.btn-secondary { background-color: transparent; border: 1px solid var(--color-border); color: var(--color-text-main); }
+.btn-sm        { padding: 6px 12px; font-size: 0.85rem; }
+
+/* ==========================================================================
+   BADGES — étiquettes colorées (ex: Jour / Nuit / En ligne)
+   ========================================================================== */
+.badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.badge-day     { background-color: var(--color-day-bg);      color: var(--color-day); }
+.badge-night   { background-color: var(--color-night-bg);    color: var(--color-night); }
+.badge-success { background-color: var(--color-primary-light); color: var(--color-primary); }
+.badge-error   { background-color: #FFEBEE; color: var(--color-error); }
+
+/* ==========================================================================
+   FORMULAIRES
+   ========================================================================== */
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 10px 15px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg-card);
+  color: var(--color-text-main);
+  transition: border-color 0.15s;
+}
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+/* ==========================================================================
+   ALERTES — messages d'état (chargement, erreur)
+   ========================================================================== */
+.alert       { padding: 15px; border-radius: var(--radius-sm); margin-bottom: 20px; }
+.alert-info  { background-color: #E3F2FD; color: var(--color-info); }
+.alert-error { background-color: #FFEBEE; color: var(--color-error); }
+
+/* ==========================================================================
+   TABLEAUX — page Trajets
+   ========================================================================== */
+.data-table { width: 100%; border-collapse: collapse; }
+
+.data-table th {
+  background-color: var(--color-bg-body);
+  padding: 15px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  border-bottom: 2px solid var(--color-border);
+}
+
+.data-table td {
+  padding: 15px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.data-table tbody tr:hover { background-color: var(--color-bg-body); }
+
+/* ==========================================================================
+   UTILITAIRES TYPOGRAPHIQUES
+   ========================================================================== */
+.text-muted   { color: var(--color-text-muted); }
+.text-primary { color: var(--color-primary); }
+.text-night   { color: var(--color-night); }
+.text-success { color: var(--color-primary); }   /* alias sémantique de primary */
+.text-error   { color: var(--color-error); }
+.text-xl      { font-size: 2rem; }
+.font-bold    { font-weight: bold; }

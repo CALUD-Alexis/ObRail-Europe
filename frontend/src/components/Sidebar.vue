@@ -1,43 +1,31 @@
 <template>
-  <aside class="sidebar">
-    <div class="sidebar-logo">
+  <!-- RGAA 12.6 : role="navigation" + aria-label pour identifier la zone -->
+  <aside class="sidebar" role="navigation" aria-label="Navigation principale">
+    <div class="sidebar-logo" aria-hidden="true">
       ObRail Europe
     </div>
 
-    <nav class="sidebar-nav">
-      <router-link to="/" class="sidebar-item">
+    <nav>
+      <router-link to="/" class="sidebar-item" aria-label="Tableau de Bord">
         Tableau de Bord
       </router-link>
-      
-      <router-link to="/trajets" class="sidebar-item">
+
+      <router-link to="/trajets" class="sidebar-item" aria-label="Rechercher un trajet">
         Rechercher Trajet
       </router-link>
 
-      <div class="sidebar-divider"></div>
-
-      <div class="sidebar-item disabled" title="Bientôt disponible">
-        Carte Réseau
-      </div>
-      <div class="sidebar-item disabled" title="Bientôt disponible">
-        Opérateurs
-      </div>
-      
-      <div class="sidebar-divider"></div>
-      
-      <div class="sidebar-item disabled" title="Bientôt disponible">
-        Administration
-      </div>
-      <router-link to="/about" class="sidebar-item">
-        À propos
+      <router-link to="/supervision" class="sidebar-item" aria-label="Supervision de l'API">
+        Supervision
       </router-link>
     </nav>
 
     <div class="sidebar-footer">
-      <span class="badge badge-success">API En Ligne</span>
+      <!-- aria-label explicite car le badge seul manque de contexte -->
+      <span class="badge badge-success" aria-label="Statut API : en ligne">API En Ligne</span>
     </div>
   </aside>
 </template>
 
 <script setup>
-// Le composant est maintenant purement visuel
+// Composant purement visuel — aucune logique nécessaire
 </script>
