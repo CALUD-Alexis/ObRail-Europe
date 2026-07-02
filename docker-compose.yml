@@ -20,8 +20,6 @@ services:
       DB_PASSWORD: postgres
       DB_DATABASE: obrail_db
       SESSION_DRIVER: cookie
-    volumes:
-      - ./backend:/app
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3333/health"]
       interval: 5s
