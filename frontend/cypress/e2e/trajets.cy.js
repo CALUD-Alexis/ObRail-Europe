@@ -47,8 +47,12 @@ describe('Page Trajets', () => {
     cy.get('[data-cy="filter-service"]').select('Nuit')
     cy.get('[data-cy="loading"]').should('not.exist')
     cy.get('[data-cy="trajet-row"]').should('have.length.greaterThan', 0)
-    cy.get('[data-cy="trajet-row"]').each(($row) => {
-      cy.wrap($row).find('.badge').should('contain', 'Nuit')
+    // .should() avec callback re-requête le DOM à chaque retry, ce qui évite
+    // les erreurs "detached from DOM" si le tableau se re-rend pendant l'itération.
+    cy.get('[data-cy="trajet-row"] .badge').should(($badges) => {
+      $badges.each((_, badge) => {
+        expect(badge.textContent).to.match(/Nuit/)
+      })
     })
   })
 

@@ -13,7 +13,6 @@
             v-model="username"
             class="form-input"
             placeholder="Entrez votre nom d'utilisateur"
-            required
           />
         </div>
         <div class="form-group">
@@ -24,7 +23,6 @@
             v-model="password"
             class="form-input"
             placeholder="Entrez votre mot de passe"
-            required
           />
         </div>
         <button type="submit" class="btn btn-primary" style="width:100%">Se connecter</button>
