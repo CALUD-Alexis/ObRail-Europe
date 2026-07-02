@@ -101,32 +101,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Start Docker stack (backend, frontend, db)
-        run: docker compose up -d --build backend frontend db
-        timeout-minutes: 5
-
-      - name: Wait for backend to be healthy
-        run: |
-          for i in $(seq 1 30); do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3333/health || echo "000")
-            if [ "$STATUS" = "200" ]; then
-              echo "Backend ready"
-              break
-            fi
-            echo "Waiting for backend... (attempt $i)"
-            sleep 3
-          done
-
-      - name: Wait for frontend to be ready
-        run: |
-          for i in $(seq 1 20); do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost || echo "000")
-            if [ "$STATUS" = "200" ]; then
-              echo "Frontend ready"
-              break
-            fi
-            echo "Waiting for frontend... (attempt $i)"
-            sleep 3
-          done
+        run: docker compose up -d --build --wait --wait-timeout 300 backend frontend db
+        timeout-minutes: 6
 
       - name: Setup Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4

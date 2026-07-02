@@ -5,7 +5,8 @@ services:
     ports:
       - "3333:3333"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
       TZ: UTC
       PORT: 3333
@@ -21,6 +22,12 @@ services:
       SESSION_DRIVER: cookie
     volumes:
       - ./backend:/app
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3333/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
 
   frontend:
     build: ./frontend
@@ -28,7 +35,14 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:80"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
 
   db:
     image: postgres:16
@@ -42,6 +56,11 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
 
   prometheus:
     image: prom/prometheus:v2.53.0
