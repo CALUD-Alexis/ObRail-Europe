@@ -2,7 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import type { NextFn } from '@adonisjs/core/types/http'
 
 export default class SecurityHeadersMiddleware {
-  async handle({ response }: HttpContext, next: NextFn) {
+  async handle({ request, response }: HttpContext, next: NextFn) {
     // Prevent clickjacking attacks
     response.header('X-Frame-Options', 'DENY')
 
@@ -18,8 +18,15 @@ export default class SecurityHeadersMiddleware {
     // Permissions policy
     response.header('Permissions-Policy', 'geolocation=(), microphone=(), camera=()')
 
-    // Content Security Policy for API
-    response.header('Content-Security-Policy', "default-src 'none'; frame-ancestors 'none'")
+    // Swagger UI requires external scripts/styles from unpkg.com and inline execution
+    if (request.url().startsWith('/docs')) {
+      response.header(
+        'Content-Security-Policy',
+        "default-src 'none'; script-src 'unsafe-inline' https://unpkg.com; style-src 'unsafe-inline' https://unpkg.com; connect-src 'self'; img-src 'self' data:; frame-ancestors 'none'"
+      )
+    } else {
+      response.header('Content-Security-Policy', "default-src 'none'; frame-ancestors 'none'")
+    }
 
     // Remove server identification
     response.header('X-Powered-By', '')

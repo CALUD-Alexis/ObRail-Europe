@@ -1,0 +1,115 @@
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: obrail-alerts
+    folder: ObRail API
+    interval: 1m
+    rules:
+      # 1. API indisponible depuis plus d'une minute
+      - uid: api-down
+        title: API Backend indisponible
+        condition: C
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Le backend ObRail ne répond plus depuis 1 minute"
+        isPaused: false
+        noDataState: Alerting
+        execErrState: Alerting
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: up{job="obrail-backend"}
+              instant: true
+              refId: A
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              refId: C
+              conditions:
+                - evaluator:
+                    type: lt
+                    params: [1]
+
+      # 2. Latence p95 supérieure à 500 ms
+      - uid: high-latency
+        title: Latence p95 supérieure à 500 ms
+        condition: C
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "La latence p95 de l'API dépasse 500 ms depuis 2 minutes"
+        isPaused: false
+        noDataState: OK
+        execErrState: Error
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))
+              instant: true
+              refId: A
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              refId: C
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [0.5]
+
+      # 3. Taux d'erreurs 5xx supérieur à 5 %
+      - uid: error-rate
+        title: Taux d'erreurs 5xx supérieur à 5 %
+        condition: C
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Plus de 5 % des requêtes retournent une erreur 5xx"
+        isPaused: false
+        noDataState: OK
+        execErrState: Error
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: sum(rate(http_requests_total{status_code=~"5.."}[5m])) / sum(rate(http_requests_total[5m])) * 100
+              instant: true
+              refId: A
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              refId: C
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [5]

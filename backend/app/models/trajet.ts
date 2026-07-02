@@ -1,49 +1,50 @@
-import { DateTime } from 'luxon'
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 
 export default class Trajet extends BaseModel {
+  static table = 'trips'
+
   @column({ isPrimary: true })
-  declare id: number
+  declare tripId: string
 
   @column()
-  declare departureStation: string
+  declare agencyId: string
 
   @column()
-  declare arrivalStation: string
+  declare originCity: string
 
   @column()
-  declare departureTime: string
+  declare destinationCity: string
 
   @column()
-  declare arrivalTime: string
+  declare originCountry: string
 
   @column()
-  declare operator: string
+  declare destinationCountry: string
 
   @column()
-  declare trainType: 'day' | 'night'
+  declare trainType: string | null
 
   @column()
-  declare durationMinutes: number
+  declare serviceType: 'Jour' | 'Nuit' | null
 
   @column()
-  declare price: number | null
+  declare distanceKm: number | null
 
   @column()
-  declare trainNumber: string | null
+  declare departureTime: string | null
 
   @column()
-  declare departureCountry: string | null
+  declare arrivalTime: string | null
 
   @column()
-  declare arrivalCountry: string | null
+  declare carbonEmissionKg: number | null
 
   @column()
-  declare active: boolean
+  declare frequencyPerWeek: number | null
 
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
+  @column()
+  declare dataSource: string
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
+  @column()
+  declare insertedAt: Date
 }

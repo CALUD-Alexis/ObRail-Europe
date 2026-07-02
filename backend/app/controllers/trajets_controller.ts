@@ -5,45 +5,45 @@ import { indexTrajetsValidator, showTrajetValidator } from '#validators/trajet'
 export default class TrajetsController {
   /**
    * GET /trajets
-   * Returns a list of all trajets with optional filtering
+   * Returns a paginated list of trips with optional filtering
    */
   async index({ request, response }: HttpContext) {
     const payload = await request.validateUsing(indexTrajetsValidator)
-    const {
-      operator,
-      trainType,
-      departureCountry,
-      arrivalCountry,
-      page = 1,
-      limit = 20,
-    } = payload
+    const { agencyId, serviceType, originCountry, destinationCountry, search, page = 1, limit = 20 } = payload
 
-    const query = Trajet.query().where('active', true)
+    const query = Trajet.query()
 
-    if (operator) {
-      query.where('operator', operator)
+    if (agencyId) {
+      query.where('agency_id', agencyId)
     }
 
-    if (trainType) {
-      query.where('trainType', trainType)
+    if (serviceType) {
+      query.where('service_type', serviceType)
     }
 
-    if (departureCountry) {
-      query.where('departureCountry', departureCountry)
+    if (originCountry) {
+      query.where('origin_country', originCountry)
     }
 
-    if (arrivalCountry) {
-      query.where('arrivalCountry', arrivalCountry)
+    if (destinationCountry) {
+      query.where('destination_country', destinationCountry)
     }
 
-    const trajets = await query.paginate(page, Math.min(limit, 100))
+    if (search) {
+      query.where((q) => {
+        q.whereILike('origin_city', `%${search}%`)
+          .orWhereILike('destination_city', `%${search}%`)
+          .orWhereILike('agency_id', `%${search}%`)
+      })
+    }
 
+    const trajets = await query.orderBy('trip_id').paginate(page, Math.min(limit, 100))
     return response.ok(trajets)
   }
 
   /**
    * GET /trajets/:id
-   * Returns a single trajet by ID
+   * Returns a single trip by trip_id (e.g. TR102898)
    */
   async show({ params, response }: HttpContext) {
     const { id } = await showTrajetValidator.validate(params)

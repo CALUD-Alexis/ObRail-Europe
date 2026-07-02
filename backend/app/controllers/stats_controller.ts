@@ -4,62 +4,43 @@ import db from '@adonisjs/lucid/services/db'
 export default class StatsController {
   /**
    * GET /stats/volumes
-   * Returns statistics about train volumes
+   * Returns statistics computed from the trips table
    */
   async volumes({ response }: HttpContext) {
-    const totalTrajets = await db.from('trajets').where('active', true).count('* as total')
+    const [totalResult, byServiceType, byAgency, byOriginCountry, avgDistance, avgCarbon] =
+      await Promise.all([
+        db.from('trips').count('* as total').first(),
+        db.from('trips').select('service_type').count('* as count').groupBy('service_type').orderBy('count', 'desc'),
+        db.from('trips').select('agency_id').count('* as count').groupBy('agency_id').orderBy('count', 'desc').limit(10),
+        db.from('trips').select('origin_country').count('* as count').groupBy('origin_country').orderBy('count', 'desc').limit(10),
+        db.from('trips').whereNotNull('distance_km').avg('distance_km as average').first(),
+        db.from('trips').whereNotNull('carbon_emission_kg').avg('carbon_emission_kg as average').first(),
+      ])
 
-    const byTrainType = await db
-      .from('trajets')
-      .where('active', true)
-      .select('train_type')
-      .count('* as count')
-      .groupBy('train_type')
-
-    const byOperator = await db
-      .from('trajets')
-      .where('active', true)
-      .select('operator')
-      .count('* as count')
-      .groupBy('operator')
-      .orderBy('count', 'desc')
-
-    const byCountry = await db
-      .from('trajets')
-      .where('active', true)
-      .select('departure_country')
-      .count('* as count')
-      .groupBy('departure_country')
-      .orderBy('count', 'desc')
-
-    const avgDuration = await db
-      .from('trajets')
-      .where('active', true)
-      .avg('duration_minutes as average')
-
-    const avgPrice = await db
-      .from('trajets')
-      .where('active', true)
-      .whereNotNull('price')
-      .avg('price as average')
+    const total = Number(totalResult?.total) || 0
+    const dayCount = byServiceType.find((r: any) => r.service_type === 'Jour')?.count ?? 0
+    const nightCount = byServiceType.find((r: any) => r.service_type === 'Nuit')?.count ?? 0
 
     return response.ok({
-      total: Number(totalTrajets[0]?.total) || 0,
-      byTrainType: byTrainType.map((item) => ({
-        type: item.train_type,
+      total,
+      byServiceType: byServiceType.map((item: any) => ({
+        serviceType: item.service_type,
+        count: Number(item.count),
+        percentage: total > 0 ? ((Number(item.count) / total) * 100).toFixed(1) : '0',
+      })),
+      dayPercentage: total > 0 ? ((Number(dayCount) / total) * 100).toFixed(1) : '0',
+      nightPercentage: total > 0 ? ((Number(nightCount) / total) * 100).toFixed(1) : '0',
+      topAgencies: byAgency.map((item: any) => ({
+        agencyId: item.agency_id,
         count: Number(item.count),
       })),
-      byOperator: byOperator.map((item) => ({
-        operator: item.operator,
-        count: Number(item.count),
-      })),
-      byDepartureCountry: byCountry.map((item) => ({
-        country: item.departure_country,
+      topOriginCountries: byOriginCountry.map((item: any) => ({
+        country: item.origin_country,
         count: Number(item.count),
       })),
       averages: {
-        durationMinutes: Math.round(Number(avgDuration[0]?.average) || 0),
-        price: Number(avgPrice[0]?.average)?.toFixed(2) || null,
+        distanceKm: Number(avgDistance?.average).toFixed(1) || null,
+        carbonEmissionKg: Number(avgCarbon?.average).toFixed(2) || null,
       },
     })
   }
