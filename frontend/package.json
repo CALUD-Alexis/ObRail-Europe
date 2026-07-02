@@ -17,7 +17,7 @@
     "lint": "vue-cli-service lint",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
-    "test:e2e": "cypress run --browser chrome --headless"
+    "test:e2e": "cypress run --browser electron --headless"
   },
   "browserslist": {
     "production": [

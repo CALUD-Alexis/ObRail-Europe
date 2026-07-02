@@ -100,8 +100,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Start full Docker stack
-        run: docker compose up -d --build
+      - name: Start Docker stack (backend, frontend, db)
+        run: docker compose up -d --build backend frontend db
         timeout-minutes: 5
 
       - name: Wait for backend to be healthy
